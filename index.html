@@ -1,23 +1,68 @@
-<!DOCTYPE html PUBLIC "-//W3C//DTD HTML 4.01//EN" "http://www.w3.org/TR/html4/strict.dtd">
-<html>
+<!DOCTYPE html>
+<html lang="en">
 <head>
-  <meta http-equiv="Content-Type" content="text/html; charset=utf-8">
-  <meta http-equiv="Content-Style-Type" content="text/css">
-  <title></title>
-  <meta name="Generator" content="Cocoa HTML Writer">
-  <meta name="CocoaVersion" content="2685.4">
-  <style type="text/css">
-    p.p1 {margin: 0.0px 0.0px 0.0px 0.0px; font: 12.0px Helvetica; -webkit-text-stroke: #000000}
-    p.p2 {margin: 0.0px 0.0px 0.0px 0.0px; font: 12.0px Helvetica; -webkit-text-stroke: #000000; min-height: 14.0px}
-    span.s1 {font-kerning: none}
-    span.s2 {font: 12.0px 'Apple Color Emoji'; font-kerning: none}
-  </style>
-</head>
-<body>
-  <h1>🏏 Cricket Match Fee Payment</h1>
-  <p>Match Fee: ₹70 per player</p>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>🏏 Cricket Tournament Payment</title>
 
-  <div class="container" id="players"></div>
+<style>
+body {
+  font-family: Arial, sans-serif;
+  margin: 0;
+  background: linear-gradient(135deg, #1e3c72, #2a5298);
+  color: white;
+  text-align: center;
+}
+
+h1 { margin-top: 20px; }
+
+.container {
+  max-width: 1000px;
+  margin: auto;
+  padding: 20px;
+}
+
+.team {
+  margin-top: 30px;
+}
+
+.card {
+  background: white;
+  color: black;
+  padding: 12px;
+  margin: 10px auto;
+  width: 260px;
+  border-radius: 12px;
+  box-shadow: 0 4px 10px rgba(0,0,0,0.3);
+}
+
+button {
+  margin-top: 8px;
+  padding: 8px 12px;
+  border: none;
+  border-radius: 6px;
+  background: #28a745;
+  color: white;
+  cursor: pointer;
+}
+
+button:hover {
+  background: #218838;
+}
+
+.paid {
+  color: green;
+  font-weight: bold;
+}
+</style>
+</head>
+
+<body>
+
+<h1>🏏 Cricket Match Fee Payment</h1>
+<p>₹70 per player</p>
+
+<div class="container" id="players"></div>
 
 <script>
 const teams = [
@@ -35,42 +80,60 @@ const teams = [
   }
 ];
 
-let paidPlayers = JSON.parse(localStorage.getItem('players')) || [];
+// Load saved paid players
+let paidPlayers = JSON.parse(localStorage.getItem("paidPlayers")) || [];
 
 function render() {
   const container = document.getElementById("players");
   container.innerHTML = "";
 
   teams.forEach(team => {
-    container.innerHTML += `<h2>${team.captain}</h2>`;
+    const teamDiv = document.createElement("div");
+    teamDiv.className = "team";
+    teamDiv.innerHTML = `<h2>${team.captain}</h2>`;
 
     team.players.forEach(player => {
       const paid = paidPlayers.includes(player);
 
-      container.innerHTML += `
-        <div class="card">
-          ${player}
-          <br>
-          ${paid 
-            ? "✅ Paid" 
-            : `<button onclick="payNow('${player}')">Pay ₹70</button>`}
-        </div>
+      const card = document.createElement("div");
+      card.className = "card";
+
+      card.innerHTML = `
+        <div>${player}</div>
+        ${paid ? '<div class="paid">✅ Paid</div>' : `<button onclick="payNow('${player}')">Pay ₹70</button>`}
       `;
+
+      teamDiv.appendChild(card);
     });
+
+    container.appendChild(teamDiv);
   });
 }
 
 function payNow(name) {
-  const upiLink = `upi://pay?pa=banibrata337-2@okaxis@upi&pn=CricketFee&am=70&cu=INR`;
+  const upiId = "banibrata337-2@okaxis"; 
 
+  const upiLink = `upi://pay?pa=${upiId}&pn=CricketFee&am=70&cu=INR`;
+
+  // Open UPI app
   window.location.href = upiLink;
 
-  if (!paidPlayers.includes(name)) {
-    paidPlayers.push(name);
-    localStorage.setItem('players', JSON.stringify(paidPlayers));
-  }
+  // Ask confirmation after delay
+  setTimeout(() => {
+    const done = confirm("Did you complete the payment?");
 
-  render();
-} render();                                                                                                                                                                 
+    if (done) {
+      if (!paidPlayers.includes(name)) {
+        paidPlayers.push(name);
+        localStorage.setItem("paidPlayers", JSON.stringify(paidPlayers));
+      }
+      render();
+    }
+  }, 3000);
+}
+
+render();
 </script>
+
 </body>
+</html>
